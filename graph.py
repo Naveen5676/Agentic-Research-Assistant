@@ -54,7 +54,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("research_graph")
 # Silence chatty HTTP / library loggers so our own lines stand out.
-for noisy in ("httpx", "sentence_transformers", "chromadb"):
+for noisy in ("httpx", "chromadb"):
     logging.getLogger(noisy).setLevel(logging.WARNING)
 
 

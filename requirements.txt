@@ -7,11 +7,8 @@ langchain-community>=0.4
 # LLM provider: Groq (hosts OpenAI's open-weight gpt-oss models)
 langchain-groq>=1.0
 
-# Vector database + local embeddings
+# Vector database (its built-in embedder runs locally via onnxruntime)
 chromadb>=1.0
-langchain-chroma>=1.0
-langchain-huggingface>=1.0
-sentence-transformers>=3.0
 langchain-text-splitters>=1.0
 
 # PDF loading

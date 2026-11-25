@@ -36,9 +36,10 @@ TEMPERATURES = {
 # ---------------------------------------------------------------------------
 # Embeddings (local, free — Groq does not offer an embeddings API)
 # ---------------------------------------------------------------------------
-# A small sentence-transformers model that runs on CPU. It is downloaded once
-# (~90 MB) on first use and cached by Hugging Face afterwards.
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+# No setting needed: ChromaDB's built-in embedder is used (all-MiniLM-L6-v2,
+# run locally through onnxruntime). The model (~80 MB) is downloaded once on
+# first use. If you ever change the embedder, clear the database and re-index:
+# vectors from different models cannot be compared.
 
 # ---------------------------------------------------------------------------
 # Document ingestion and retrieval

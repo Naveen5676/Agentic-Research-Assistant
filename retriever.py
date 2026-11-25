@@ -7,12 +7,15 @@ if needed, write a better query (see graph.py).
 """
 
 import config
-from ingest import get_vectorstore
+from ingest import get_collection
 
 
 def search_documents(query: str) -> list[dict]:
     """
     Return the TOP_K chunks closest in meaning to `query`.
+
+    Chroma embeds the query text with the same model used at indexing time,
+    then returns the nearest chunks by cosine distance.
 
     Each chunk is a dict:
         id   -> unique chunk id in Chroma (used to avoid duplicates)
@@ -21,12 +24,16 @@ def search_documents(query: str) -> list[dict]:
 
     Returns [] when nothing is indexed.
     """
-    hits = get_vectorstore().similarity_search(query, k=config.TOP_K)
+    result = get_collection().query(query_texts=[query], n_results=config.TOP_K)
+
+    # Chroma returns one list per query text; we sent one, so take [0].
     return [
         {
-            "id": doc.id,
-            "tag": f"[{doc.metadata.get('source', 'unknown')}, p.{doc.metadata.get('page', '?')}]",
-            "text": " ".join(doc.page_content.split()),  # collapse newlines/spaces
+            "id": chunk_id,
+            "tag": f"[{meta.get('source', 'unknown')}, p.{meta.get('page', '?')}]",
+            "text": " ".join(text.split()),  # collapse newlines/spaces
         }
-        for doc in hits
+        for chunk_id, text, meta in zip(
+            result["ids"][0], result["documents"][0], result["metadatas"][0]
+        )
     ]

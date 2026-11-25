@@ -13,7 +13,7 @@ only from your documents.
    cited as `[filename, p.N]`.
 
 **Stack:** LangGraph · LangChain · Groq (`openai/gpt-oss-120b`) · ChromaDB ·
-local sentence-transformers embeddings · Streamlit
+Chroma's built-in local embeddings (all-MiniLM-L6-v2) · Streamlit
 
 ## How it works
 
@@ -60,7 +60,7 @@ copy .env.example .env          # Windows   (cp on macOS / Linux)
 streamlit run app.py
 ```
 
-The first time you index documents, the embedding model (~90 MB) downloads once.
+The first time you index documents, the embedding model (~80 MB) downloads once.
 
 ## Environment variables
 
@@ -69,7 +69,7 @@ The first time you index documents, the embedding model (~90 MB) downloads once.
 | `GROQ_API_KEY` | yes      | LLM calls. Get one at https://console.groq.com/keys  |
 | `MODEL`        | no       | Override the model, e.g. `groq:openai/gpt-oss-20b`   |
 
-Embeddings run locally, so no OpenAI key is needed. Groq has no embeddings API.
+Embeddings run locally through ChromaDB's built-in embedder, so no OpenAI key is needed. Groq has no embeddings API. If you change the embedder, clear the database and re-index.
 
 ## Using the app
 

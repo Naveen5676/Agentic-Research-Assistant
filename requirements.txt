@@ -1,0 +1,25 @@
+# Agent framework
+langgraph>=1.0
+langchain>=1.0
+langchain-core>=1.0
+langchain-community>=0.4
+
+# LLM provider: Groq (hosts OpenAI's open-weight gpt-oss models)
+langchain-groq>=1.0
+
+# Vector database + local embeddings
+chromadb>=1.0
+langchain-chroma>=1.0
+langchain-huggingface>=1.0
+sentence-transformers>=3.0
+langchain-text-splitters>=1.0
+
+# PDF loading
+pypdf>=5.0
+
+# Web search (Tavily, needs TAVILY_API_KEY)
+langchain-tavily>=0.2
+
+# UI and env
+streamlit>=1.40
+python-dotenv>=1.0

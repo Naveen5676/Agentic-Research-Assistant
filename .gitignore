@@ -1,0 +1,16 @@
+# Secrets
+.env
+
+# Vector database (rebuilt by indexing)
+chroma_db/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Streamlit / editors
+.streamlit/secrets.toml
+.vscode/
+.idea/

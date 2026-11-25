@@ -9,7 +9,7 @@ import os
 
 from dotenv import load_dotenv
 
-# Load variables from the .env file (GROQ_API_KEY, TAVILY_API_KEY, ...) into
+# Load variables from the .env file (GROQ_API_KEY, ...) into
 # os.environ. Every other module imports config first, so this runs once, early.
 load_dotenv()
 
@@ -22,11 +22,14 @@ load_dotenv()
 # cheaper (but weaker) model.
 MODEL = os.getenv("MODEL", "groq:openai/gpt-oss-120b")
 
-# One temperature per agent role. Planner and researchers should be
-# deterministic; the writer gets a little creativity for nicer prose.
+# One temperature per agent role. Planning, grading, query rewriting and
+# answering should be deterministic; the writer gets a little creativity
+# for nicer prose.
 TEMPERATURES = {
     "planner": 0.0,
-    "researcher": 0.0,
+    "grader": 0.0,      # judges whether retrieved chunks are relevant
+    "rewriter": 0.0,    # writes a better search query when they are not
+    "researcher": 0.0,  # answers one sub-question from the relevant chunks
     "writer": 0.6,
 }
 
@@ -42,15 +45,17 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 # ---------------------------------------------------------------------------
 CHUNK_SIZE = 1000          # characters per chunk
 CHUNK_OVERLAP = 150        # characters shared between neighbouring chunks
-TOP_K = 4                  # chunks returned by each search_documents call
+TOP_K = 4                  # chunks returned by each search
 
 # ---------------------------------------------------------------------------
 # Agent behaviour
 # ---------------------------------------------------------------------------
 MIN_SUBQUESTIONS = 3
 MAX_SUBQUESTIONS = 5
-MAX_TOOL_CALLS = 4         # hard cap on tool calls per researcher
-WEB_MAX_RESULTS = 3        # results per web search
+# Self-correcting RAG: if the grader finds no relevant chunk, the researcher
+# rewrites its query and searches again, at most this many times.
+# 2 rewrites = at most 3 searches per sub-question. Hard limit: no endless loops.
+MAX_QUERY_REWRITES = 2
 
 # ---------------------------------------------------------------------------
 # Rate-limit protection (Groq free tier = 8,000 tokens per minute)

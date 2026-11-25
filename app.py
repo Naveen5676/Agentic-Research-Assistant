@@ -60,8 +60,23 @@ def run_graph(graph_input, label: str) -> None:
     st.session_state.run_error = None
     with st.status(label, expanded=True) as status:
         try:
-            for update in graph.stream(graph_input, run_config(), stream_mode="updates"):
-                for node, payload in update.items():
+            # Two stream modes at once:
+            #   "updates" -> one item each time a main-graph node finishes
+            #   "custom"  -> events the nodes send themselves (the researcher's
+            #                "rewrite" step reports its new query this way)
+            # subgraphs=True includes events from inside the researcher
+            # subgraphs. Each item is (namespace, mode, data); namespace is ()
+            # for the main graph and non-empty inside a researcher.
+            for namespace, mode, data in graph.stream(
+                graph_input, run_config(), stream_mode=["updates", "custom"], subgraphs=True
+            ):
+                if mode == "custom":
+                    if data.get("event") == "rewrite":
+                        status.write(f"🔁 No relevant chunks, retrying with: *{data['query']}*")
+                    continue
+                if namespace:  # node updates inside a subgraph: not shown
+                    continue
+                for node, payload in data.items():
                     if node == "__interrupt__":
                         status.write("⏸️ Waiting for your approval of the plan")
                     elif node == "researcher":
@@ -168,17 +183,19 @@ elif st.session_state.interrupt_payload:
 elif draft:
     st.download_button("⬇️ Download report.md", draft, file_name="report.md", mime="text/markdown")
 
-    # Show how the researchers overlapped in time (proof they ran in parallel).
+    # Show how the researchers overlapped in time (proof they ran in parallel)
+    # and which search queries each one used (proof of self-correction).
     findings = state_values.get("findings", [])
     if findings:
-        with st.expander("Researcher timings"):
+        with st.expander("Researcher details"):
             t0 = min(f["started_at"] for f in findings)
             rows = [{
                 "sub-question": f["question"],
                 "start (s)": round(f["started_at"] - t0, 2),
                 "end (s)": round(f["finished_at"] - t0, 2),
                 "started at": datetime.fromtimestamp(f["started_at"]).strftime("%H:%M:%S.%f")[:-3],
-                "tool calls": f["tool_calls"],
+                "searches": len(f["queries"]),
+                "queries used": " → ".join(f["queries"]),
             } for f in findings]
             st.dataframe(rows, use_container_width=True)
 
